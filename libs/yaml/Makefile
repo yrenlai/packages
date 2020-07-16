@@ -8,20 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=yaml
-PKG_VERSION:=0.2.1
+PKG_VERSION:=0.2.5
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://pyyaml.org/download/libyaml/
-PKG_HASH:=78281145641a080fb32d6e7a87b9c0664d611dcb4d542e90baf731f51cbb59cd
+PKG_HASH:=c642ae9b75fee120b2d96c712538bd2cf283228d2337df2cf2988e3c02678ef4
 
+PKG_MAINTAINER:=
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=COPYING
-PKG_MAINTAINER:=Nicolas Thill <nico@openwrt.org>
+PKG_CPE_ID:=cpe:/a:pyyaml_project:pyyaml
 
-PKG_FIXUP:=autoreconf
-PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 

@@ -8,29 +8,28 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gst1-plugins-ugly
-PKG_VERSION:=1.14.1
+PKG_VERSION:=1.17.1
 PKG_RELEASE:=1
+
+PKG_SOURCE:=gst-plugins-ugly-$(PKG_VERSION).tar.xz
+PKG_SOURCE_URL:=https://gstreamer.freedesktop.org/src/gst-plugins-ugly
+PKG_HASH:=a5e564107120b5b27c48709c5dfdb266737def5b3eb7aaabaddd304d425d8f21
+PKG_BUILD_DIR:=$(BUILD_DIR)/gst-plugins-ugly-$(PKG_VERSION)
 
 PKG_MAINTAINER:=W. Michael Petullo <mike@flyn.org> \
 		Ted Hess <thess@kitschensync.net>
-
-PKG_LICENSE:=LGPLv2
+PKG_LICENSE:=LGPL-2.1-or-later
 PKG_LICENSE_FILES:=COPYING
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/gst-plugins-ugly-$(PKG_VERSION)
-PKG_SOURCE:=gst-plugins-ugly-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=http://gstreamer.freedesktop.org/src/gst-plugins-ugly/
-PKG_HASH:=cff2430bb13f54ef81409a0b3d65ce409a376d4a7bab57a14a97d602539fe1d3
-
-PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_gst1-mod-asf \
-	CONFIG_PACKAGE_gst1-mod-mpeg2dec \
-
-PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
+include ../../devel/meson/meson.mk
+
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_PACKAGE_gst1-mod-asf \
+	CONFIG_PACKAGE_gst1-mod-mpeg2dec \
 
 GST_UGLY_MODULES:=
 
@@ -38,7 +37,7 @@ define Package/gstreamer1-ugly/Default
   CATEGORY:=Multimedia
   SECTION:=multimedia
   TITLE:=GStreamer
-  URL:=http://gstreamer.freedesktop.org/
+  URL:=https://gstreamer.freedesktop.org/
   DEPENDS:= +libgstreamer1 $(ICONV_DEPENDS)
 endef
 
@@ -89,39 +88,33 @@ define Package/gstreamer1-plugins-ugly/config
 
 endef
 
-GST_COND_SELECT = $(patsubst %,$(if $(CONFIG_PACKAGE_gst1-mod-$(1)),--enable,--disable)-%,$(1))
+GST_COND_SELECT = -D$(1)=$(if $(CONFIG_PACKAGE_gst1-mod-$(1)),en,dis)abled
 
 GST_VERSION:=1.0
 
-CONFIGURE_ARGS += \
-	--disable-debug \
-	--disable-examples \
+MESON_ARGS += \
+	-Dasfdemux=$(if $(CONFIG_PACKAGE_gst1-mod-asf),en,dis)abled \
+	-Ddvdlpcmdec=disabled \
+	-Ddvdsub=disabled \
+	-Drealmedia=disabled \
+	-Dxingmux=disabled \
 	\
-	--disable-a52dec \
-	--disable-amrnb \
-	--disable-amrwb \
-	$(call GST_COND_SELECT,asf) \
-	--disable-cdio \
-	--disable-dvdlpcmdec \
-	--disable-dvdread \
-	--disable-dvdsub \
-	--disable-iec958 \
+	-Da52dec=disabled \
+	-Damrnb=disabled \
+	-Damrwbdec=disabled \
+	-Dcdio=disabled \
+	-Ddvdread=disabled \
 	$(call GST_COND_SELECT,mpeg2dec) \
-	--disable-mpegaudioparse \
-	--disable-mpegstream \
-	--disable-realmedia \
-	--disable-sidplay \
-	--disable-synaesthesia \
-	--disable-twolame \
-	--disable-x264 \
+	-Dsidplay=disabled \
+	-Dx264=disabled \
 	\
-	--without-libiconv-prefix \
-	--without-libintl-prefix \
-
-EXTRA_LDFLAGS+= \
-	-Wl,-rpath-link=$(STAGING_DIR)/usr/lib \
-	$(if $(ICONV_FULL),-liconv) \
-
+	-Dnls=enabled \
+	-Dorc=disabled \
+	-Dtests=disabled \
+	-Dgobject-cast-checks=disabled \
+	-Dglib-asserts=disabled \
+	-Dglib-checks=disabled \
+	-Ddoc=disabled
 
 define Package/gst1-plugins-ugly/install
 	/bin/true

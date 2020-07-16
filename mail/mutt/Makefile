@@ -8,21 +8,22 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mutt
-PKG_VERSION:=1.10.0
+PKG_VERSION:=1.12.2
 PKG_RELEASE:=1
 
-PKG_SOURCE_URL:=ftp://ftp.mutt.org/pub/mutt/ \
-		https://bitbucket.org/mutt/mutt/downloads/
+PKG_SOURCE_URL:=https://bitbucket.org/mutt/mutt/downloads/ \
+		http://ftp.mutt.org/pub/mutt/
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_HASH:=0215b5f90ef9cc33441a6ca842379b64412ed7f8da83ed68bfaa319179f5535b
+PKG_HASH:=bc42750ce8237742b9382f2148fc547a8d8601aa4a7cd28c55fe7ca045196882
 
-PKG_LICENSE:=GPL-2.0+
-PKG_LICENSE_FILES:=GPL
 PKG_MAINTAINER:=Phil Eichinger <phil@zankapfel.net>
+PKG_LICENSE:=GPL-2.0-or-later
+PKG_LICENSE_FILES:=GPL
+PKG_CPE_ID:=cpe:/a:mutt:mutt
 
 PKG_FIXUP:=autoreconf
-
 PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 

@@ -8,40 +8,37 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=django-statici18n
-PKG_VERSION:=1.6.1
-PKG_RELEASE:=1
+PKG_VERSION:=1.9.0
+PKG_RELEASE:=2
+
+PYPI_NAME:=$(PKG_NAME)
+PKG_HASH:=913dd056c1abcbe129b1db806cb4cfb821c4077d7e857d6eb29043ea64f4d1d0
+
+PKG_MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
+PKG_LICENSE_FILES:=LICENSE
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://pypi.python.org/packages/0a/24/1bed254529fc492ee5daf4cba18cf188b059866049889ecf1f178f25a2c2/
-PKG_HASH:=47d30939d52bcbbf1cbfe56b786bc2f2ea874266a8315cb027c061f320c4e2f6
-
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
-include ../python-package.mk
+include ../python3-package.mk
 
-define Package/django-statici18n
+define Package/python3-django-statici18n
   SUBMENU:=Python
   SECTION:=lang
   CATEGORY:=Languages
-  MAINTAINER:=Gergely Kiss <mail.gery@gmail.com>
-  TITLE:=A Django app that provides helper for generating JavaScript catalog to static files.
-  URL:=http://django-statici18n.readthedocs.org/
-  DEPENDS:=+python +django
+  TITLE:=Helper for generating JavaScript catalog to static files
+  URL:=https://django-statici18n.readthedocs.io
+  DEPENDS:= \
+	+python3 \
+	+python3-django1 \
+	+python3-django-appconf \
+	+python3-six
 endef
 
-define Package/django-statici18n/description
+define Package/python3-django-statici18n/description
   A Django app that provides helper for generating JavaScript catalog to static files.
 endef
 
-define Build/Compile
-	$(call Build/Compile/PyMod,,install --prefix=/usr --root=$(PKG_INSTALL_DIR))
-endef
-
-define Package/django-statici18n/install
-	$(INSTALL_DIR) $(1)$(PYTHON_PKG_DIR)
-	$(CP) \
-	    $(PKG_INSTALL_DIR)$(PYTHON_PKG_DIR)/* \
-	    $(1)$(PYTHON_PKG_DIR)
-endef
-
-$(eval $(call BuildPackage,django-statici18n))
+$(eval $(call Py3Package,python3-django-statici18n))
+$(eval $(call BuildPackage,python3-django-statici18n))
+$(eval $(call BuildPackage,python3-django-statici18n-src))

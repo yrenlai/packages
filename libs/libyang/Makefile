@@ -8,24 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libyang
-PKG_VERSION:=0.15.130
-PKG_RELEASE=$(PKG_SOURCE_VERSION)
+PKG_VERSION:=1.0.167
+PKG_RELEASE:=1
 
-PKG_LICENSE:=GPL-2.0+
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/CESNET/libyang/tar.gz/v$(PKG_VERSION)?
+PKG_HASH:=2431fa5c7cfbe6a6f2c0873547b976f018438967adfe268726911dd3d95eaa31
+
 PKG_MAINTAINER:=Mislav Novakovic <mislav.novakovic@sartura.hr>
+PKG_LICENSE:=BSD-3-Clause
+PKG_LICENSE_FILES:=LICENSE
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=d6baaf90e24af3b07649e9dda6fc0d9b272b2ebc
-PKG_MIRROR_HASH:=eace667ae787ac27b7c717a52f672d05e55608c47d9e54d39d60f8ab5e47f0c9
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.xz
-PKG_SOURCE_URL:=https://github.com/CESNET/libyang.git
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION)
-
-PKG_BUILD_ROOT:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
-PKG_BUILD_DIR:=$(PKG_BUILD_ROOT)
-
+CMAKE_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
-PKG_INSTALL:=1
+CMAKE_BINARY_SUBDIR:=build
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -34,15 +30,23 @@ define Package/libyang
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=YANG data modeling language library
-  URL:=$(PKG_SOURCE_URL)
+  URL:=https://github.com/CESNET/libyang
   DEPENDS:=+libpcre +libpthread
+endef
+
+define Package/libyang-cpp
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE:=YANG data modeling C++ language library
+  URL:=https://github.com/CESNET/libyang
+  DEPENDS:=+libyang +libstdcpp
 endef
 
 define Package/yanglint
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=YANG data modeling language utility
-  URL:=$(PKG_SOURCE_URL)
+  URL:=https://github.com/CESNET/libyang
   DEPENDS:=+libyang
 endef
 
@@ -51,22 +55,12 @@ define Package/libyang/description
  The library is used e.g. in libnetconf2, Netopeer2 or sysrepo projects.
 endef
 
-TARGET_LDFLAGS += -lm
-
 CMAKE_OPTIONS += \
-	-DCMAKE_INSTALL_PREFIX:PATH=/usr \
-	-DCMAKE_BUILD_TYPE:STRING=Release
+	-DENABLE_LYD_PRIV:BOOL=ON \
+	-DCMAKE_BUILD_TYPE:String="Release" \
+	-DGEN_LANGUAGE_BINDINGS=ON \
+	-DGEN_PYTHON_BINDINGS=OFF
 
-define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libyang.so* $(1)/usr/lib/
-
-	$(INSTALL_DIR) $(1)/usr/include/libyang
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/include/libyang/* $(1)/usr/include/libyang/
-
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libyang.pc $(1)/usr/lib/pkgconfig/
-endef
 
 define Package/libyang/install
 	$(INSTALL_DIR) $(1)/usr/lib
@@ -79,10 +73,16 @@ define Package/libyang/install
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/libyang/user_types/* $(1)/usr/lib/libyang/user_types
 endef
 
+define Package/libyang-cpp/install
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libyang-cpp.so* $(1)/usr/lib/
+endef
+
 define Package/yanglint/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/yanglint $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/yanglint $(1)/usr/bin/
 endef
 
 $(eval $(call BuildPackage,libyang))
+$(eval $(call BuildPackage,libyang-cpp))
 $(eval $(call BuildPackage,yanglint))

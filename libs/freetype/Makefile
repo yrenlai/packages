@@ -8,22 +8,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=freetype
-PKG_VERSION:=2.9.1
+PKG_VERSION:=2.10.2
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@SF/freetype
-PKG_HASH:=db8d87ea720ea9d5edc5388fc7a0497bb11ba9fe972245e0f7f4c7e8b1e1e84d
+PKG_HASH:=1543d61025d2e6312e0a1c563652555f17378a204a61e99928c9fcef030a2d8b
 
-PKG_LICENSE:=FTL GPL-2.0 MIT ZLIB
-PKG_LICENSE_FILES:=docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT src/bdf/README src/pcf/README src/gzip/zlib.h
 PKG_MAINTAINER:=Val Kulkov <val.kulkov@gmail.com>
+PKG_LICENSE:=FTL GPL-2.0-only MIT ZLIB GPL-3.0-or-later
+PKG_LICENSE_FILES:=docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT src/bdf/README src/pcf/README src/gzip/zlib.h builds/unix/config.sub builds/unix/config.guess builds/unix/libtool 
+PKG_CPE_ID:=cpe:/a:freetype:freetype2
 
-PKG_FIXUP:=autoreconf
-PKG_LIBTOOL_PATHS:=builds/unix
+CMAKE_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
+CMAKE_BINARY_SUBDIR:=build
 
-include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/cmake.mk
 
 define Package/libfreetype
   SECTION:=libs
@@ -40,43 +42,18 @@ define Package/libfreetype/description
  efficient and ubiquitous products.
 endef
 
-TARGET_CFLAGS += $(FPIC)
-
-CONFIGURE_ARGS += \
-	--enable-freetype-config \
-	--enable-shared \
-	--enable-static \
-	--with-bzip2=no \
-	--with-zlib=yes \
-	--with-png=yes
-
-define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) DESTDIR="$(PKG_INSTALL_DIR)" all install
-endef
-
-define Build/InstallDev
-	$(INSTALL_DIR) $(1)/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/freetype-config $(1)/bin/
-	$(INSTALL_DIR) $(2)/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/freetype-config $(2)/bin/
-	$(INSTALL_DIR) $(1)/usr/include
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/freetype2 $(1)/usr/include/
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfreetype.{a,so*} $(1)/usr/lib/
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/freetype2.pc $(1)/usr/lib/pkgconfig/
-
-	$(SED) \
-		's,/usr/include,$$$${prefix}/include,g; \
-		 s,/usr/lib,$$$${exec_prefix}/lib,g' \
-		 $(1)/usr/lib/pkgconfig/freetype2.pc
-endef
-
+CMAKE_OPTIONS += \
+	-DBUILD_SHARED_LIBS=ON \
+	-DCMAKE_DISABLE_FIND_PACKAGE_BZip2=ON \
+	-DFT_WITH_ZLIB=ON \
+	-DFT_WITH_BZIP2=OFF \
+	-DFT_WITH_PNG=ON \
+	-DFT_WITH_HARFBUZZ=OFF \
+	-DFT_WITH_BROTLI=OFF
 
 define Package/libfreetype/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfreetype.so.* $(1)/usr/lib/
 endef
 
-$(eval $(call HostBuild))
 $(eval $(call BuildPackage,libfreetype))

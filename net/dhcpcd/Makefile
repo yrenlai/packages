@@ -8,16 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dhcpcd
-PKG_VERSION:=7.0.5
+PKG_VERSION:=7.2.2
 PKG_RELEASE:=1
 
 PKG_SOURCE_URL:=ftp://roy.marples.name/pub/dhcpcd \
     http://roy.marples.name/downloads/dhcpcd
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_HASH:=aa43fdb990be7c413fa92bdbcfb3775e4cdbff725cbcb68cd2a714ed4f58879d
+PKG_HASH:=3db7ff18cba9274da1d2176fb3c7cbe23926a8e58d5c8e244ad55c62d38ba09e
 
 PKG_LICENSE:=BSD-2c
 PKG_LICENSE_FILES:=
+PKG_CPE_ID:=cpe:/a:roy_marples:dhcpcd
 
 PKG_MAINTAINER:=Marko Ratkaj <marko.ratkaj@sartura.hr>
 

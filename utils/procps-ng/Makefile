@@ -8,24 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=procps-ng
-PKG_VERSION:=3.3.11
-PKG_RELEASE:=4
-PKG_LICENSE:=GPL-2.0
+PKG_VERSION:=3.3.16
+PKG_RELEASE:=1
+
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+PKG_SOURCE_URL:=@SF/procps-ng
+PKG_HASH:=925eacd65dedcf9c98eb94e8978bbfb63f5de37294cc1047d81462ed477a20af
+
+PKG_MAINTAINER:=
+PKG_LICENSE:=GPL-2.0-or-later
 PKG_LICENSE_FILES:=COPYING COPYING.LIB
-
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://gitlab.com/procps-ng/procps.git
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=8a198e3eafbde0b627e9992b41d26e6762e4f8c7
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_MIRROR_HASH:=60da7bd78e834112494e4019998c9de8d61f747eab244ef3c42cadc7fd0958cc
-
-PKG_MAINTAINER:=Gergely Kiss <mail.gery@gmail.com>
 
 PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
 PKG_FIXUP:=autoreconf
-PKG_BUILD_DEPENDS:=gettext libiconv
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -76,7 +72,6 @@ define GenPlugin
    $(call Package/procps-ng/Default)
    DEPENDS:=procps-ng
    TITLE:=Applet $(2) from the procps-ng package
-   DEFAULT:=y
    ALTERNATIVES:=200:$(3)/$(2):$(3)/$(1)
  endef
 
@@ -94,7 +89,7 @@ MAKE_FLAGS += \
 
 define Package/procps-ng/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/libprocps.so* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libprocps.so* $(1)/usr/lib/
 endef
 
 define BuildPlugin

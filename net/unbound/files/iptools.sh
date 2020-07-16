@@ -82,7 +82,7 @@ domain_ptr_ip4() {
 ##############################################################################
 
 host_ptr_ip4() {
-  # Get omplete host ...in-addr.arpa.
+  # Get complete host ...in-addr.arpa.
   echo "$1" | awk -F. \
   '{ x = ( $4"."$3"."$2"."$1".in-addr.arpa" ) ;
   sub(/\/[0-9]+/,"",x) ;
@@ -124,6 +124,21 @@ valid_subnet4() {
 
 ##############################################################################
 
+valid_subnet_any() {
+  local subnet=$1
+  local validip4=$( valid_subnet4 $subnet )
+  local validip6=$( valid_subnet6 $subnet )
+
+
+  if [ "$validip4" = "ok" ] || [ "$validip6" = "ok" ] ; then
+    echo "ok"
+  else
+    echo "not"
+  fi
+}
+
+##############################################################################
+
 private_subnet() {
   case "$1" in
     10"."*) echo "ok" ;;
@@ -132,6 +147,17 @@ private_subnet() {
     172"."3[0-1]"."*) echo "ok" ;;
     192"."168"."*) echo "ok" ;;
     f[cd][0-9a-f][0-9a-f]":"*) echo "ok" ;;
+    *) echo "not" ;;
+  esac
+}
+
+##############################################################################
+
+local_subnet() {
+  # local subnet 2nd place is limited to one digit to improve the filter
+  case "$1" in
+    127"."[0-9]"."[0-9]*) echo "ok" ;;
+    ::1) echo "ok" ;;
     *) echo "not" ;;
   esac
 }

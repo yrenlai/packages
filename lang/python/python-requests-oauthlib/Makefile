@@ -1,6 +1,4 @@
 #
-# Copyright (C) 2007-2016 OpenWrt.org
-#
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
@@ -8,41 +6,37 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python-requests-oauthlib
-PKG_VERSION:=1.0.0
-PKG_RELEASE:=1
+PKG_VERSION:=1.3.0
+PKG_RELEASE:=2
+
+PKG_MAINTAINER:=Eneas U de Queiroz <cotequeiroz@gmail.com>
 PKG_LICENSE:=ISC
+PKG_LICENSE_FILES:=LICENSE
 
-PKG_SOURCE:=requests-oauthlib-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://files.pythonhosted.org/packages/95/be/072464f05b70e4142cb37151e215a2037b08b1400f8a56f2538b76ca6205
-PKG_HASH:=8886bfec5ad7afb391ed5443b1f697c6f4ae98d0e5620839d8b4499c032ada3f
-PKG_BUILD_DIR:=$(BUILD_DIR)/requests-oauthlib-$(PKG_VERSION)
+PYPI_NAME:=requests-oauthlib
+PKG_HASH:=b4261601a71fd721a8bd6d7aa1cc1d6a8a93b4a9f5e96626f8e4d91e8beeaa6a
 
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
-include ../python-package.mk
+include ../python3-package.mk
 
-define Package/python-requests-oauthlib
+define Package/python3-requests-oauthlib
   SUBMENU:=Python
   SECTION:=lang
   CATEGORY:=Languages
-  MAINTAINER:=Eneas U de Queiroz <cote2004-github@yahoo.com>
-  TITLE:=OAuthlib authentication support for Requests.
+  TITLE:=OAuthlib auth for Requests
   URL:=https://github.com/requests/requests-oauthlib
-  DEPENDS:=+python +python-requests +python-oauthlib +python-cryptography +pyjwt
+  DEPENDS:= \
+	+python3 \
+	+python3-oauthlib \
+	+python3-requests
 endef
 
-define Package/python-requests-oauthlib/description
-  This project provides first-class OAuth library support for Requests.
+define Package/python3-requests-oauthlib/description
+  This python package provides first-class OAuth library support
+  for Requests.
 endef
 
-define Build/Compile
-	$(call Build/Compile/PyMod,,install --prefix=/usr --root=$(PKG_INSTALL_DIR))
-endef
-
-define Package/python-requests-oauthlib/install
-	$(INSTALL_DIR) $(1)$(PYTHON_PKG_DIR)
-	$(CP) \
-	    $(PKG_INSTALL_DIR)$(PYTHON_PKG_DIR)/* \
-	    $(1)$(PYTHON_PKG_DIR)
-endef
-
-$(eval $(call BuildPackage,python-requests-oauthlib))
+$(eval $(call Py3Package,python3-requests-oauthlib))
+$(eval $(call BuildPackage,python3-requests-oauthlib))
+$(eval $(call BuildPackage,python3-requests-oauthlib-src))

@@ -8,21 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=conserver
-PKG_VERSION:=8.2.2
+PKG_VERSION:=8.2.5
 PKG_RELEASE:=1
-PKG_MAINTAINER:=Bjørn Mork <bjorn@mork.no>
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/conserver/conserver.git
-PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_MIRROR_HASH:=27d92e6c04e97cd0884774eace0b44f30087695927bcce8addc11dba9c090d7c
+PKG_SOURCE_URL:=https://codeload.github.com/conserver/conserver/tar.gz/v$(PKG_VERSION)?
+PKG_HASH:=43be704932bca365d7bf34be929851cf0bb7a229cc28391b3302ae19d6e6565b
 
+PKG_MAINTAINER:=Bjørn Mork <bjorn@mork.no>
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=LICENSE
 
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -57,9 +56,16 @@ endef
 
 CONFIGURE_ARGS += \
 	--with-openssl \
+	$(if $(CONFIG_IPV6),--with-ipv6) \
 	--sysconfdir=/etc/conserver \
 	--with-port=3109 \
 	--with-logfile=/var/log/conserver/server.log
+
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	$(CP) ./files/config.sub $(PKG_BUILD_DIR)/
+	$(CP) ./files/config.guess $(PKG_BUILD_DIR)/
+endef
 
 define Package/conserver/install
 	$(INSTALL_DIR) $(1)/usr/sbin

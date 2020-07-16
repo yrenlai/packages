@@ -8,20 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dmapd
-PKG_VERSION:=0.0.75
+PKG_VERSION:=0.0.85
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=W. Michael Petullo <mike@flyn.org>
 
-PKG_LICENSE:=GPLv2
+PKG_LICENSE:=GPL-2.0-or-later
 PKG_LICENSE_FILES:=COPYING
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.flyn.org/projects/dmapd
-PKG_HASH:=f296a5ba02eae36a41381d19d5d08f2b9b7657091db9674f82121cd26c2893a1
+PKG_HASH:=69800cb96c91f6362432ec50df8f810e0ca1c499c6468e84c30731ea3b67dd78
 
-PKG_FIXUP:=autoreconf
-PKG_INSTALL:=2
+PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
@@ -35,16 +35,16 @@ define Package/dmapd
   USERID:=dmapd=56:dmapd=56
 endef
 
-define Package/dmapd/decription
+define Package/dmapd/description
 	Dmapd is a DMAP server
 endef
+
+CONFIGURE_ARGS += \
+	--disable-check
 
 define Package/dmapd/conffiles
 /etc/dmapd.conf
 endef
-
-TARGET_LDFLAGS+=\
-	-Wl,-rpath-link=$(STAGING_DIR)/usr/lib \
 
 define Package/dmapd/install
 	$(INSTALL_DIR) $(1)/usr/sbin

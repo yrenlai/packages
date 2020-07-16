@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=proto-bonding
-PKG_VERSION:=2018-06-11
+PKG_VERSION:=2020-03-30
 PKG_RELEASE:=1
 
 PKG_LICENSE:=GPL-2.0
@@ -23,6 +23,7 @@ define Package/proto-bonding
   CATEGORY:=Network
   TITLE:=Link Aggregation (Channel Bonding) proto handler
   DEPENDS:=+kmod-bonding
+  PKGARCH:=all
 endef
 
 define Package/proto-bonding/description

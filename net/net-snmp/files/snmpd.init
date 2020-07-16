@@ -317,7 +317,7 @@ start_service() {
 	append_parm v1trapaddress host v1trapaddress
 	append_parm trapsess trapsess trapsess
 
-	procd_set_param command $PROG -Lf /dev/null -f
+	procd_set_param command $PROG -Lf /dev/null -f -r
 	procd_set_param file $CONFIGFILE
 	procd_set_param respawn
 
@@ -337,7 +337,9 @@ start_service() {
 }
 
 stop_service() {
-	[ -f "$CONFIGFILE" ] && rm -f "$CONFIGFILE"
+	[ -f "$CONFIGFILE" ] || return
+	rm -f "$CONFIGFILE"
+	procd_set_config_changed firewall
 }
 
 service_triggers(){
@@ -349,4 +351,9 @@ service_triggers(){
 	procd_close_trigger
 
 	procd_add_reload_trigger 'snmpd'
+}
+
+service_started() {
+	[ "$snmp_enabled" -eq 0 ] && return
+	procd_set_config_changed firewall
 }

@@ -5,46 +5,46 @@
 # See /LICENSE for more information.
 
 include $(TOPDIR)/rules.mk
+include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=jool
-PKG_VERSION:=2018.01.17
-PKG_RELEASE:=2
+PKG_VERSION:=4.0.9
+PKG_RELEASE:=1
 
-PKG_LICENSE:=GPL-3.0
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/NICMx/Jool/releases/download/v$(PKG_VERSION)
+PKG_HASH:=d42215f87abf2e113bc039d23e6b4e1c39cafc90f0e5584adf0e40e996c68ffb
+
+PKG_MAINTAINER:=
+PKG_LICENSE:=GPL-2.0-only
 PKG_LICENSE_FILES:=COPYING
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/NICMx/Jool.git
-PKG_SOURCE_VERSION:=9dfaf22e49f7905d94af9b73f9bee22c26d7dd4a
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_SOURCE_VERSION)
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_VERSION).tar.xz
-PKG_MIRROR_HASH:=79b558561f06f3df01a541b1d39b7d3d88f91d0ee6b8ce3abf91ebbed737225a
-
-PKG_BUILD_DIR=$(KERNEL_BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_DEPENDS:=USE_UCLIBC:argp-standalone USE_MUSL:argp-standalone
+PKG_BUILD_DEPENDS:=!USE_GLIBC:argp-standalone
 
-PKG_FIXUP:=autoreconf
-
-include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
-
-MAKE_PATH:=usr
-CONFIGURE_PATH:=usr
 
 define Build/Compile
 	$(MAKE) -C "$(LINUX_DIR)" \
 		KERNEL_DIR="$(LINUX_DIR)" \
 		ARCH="$(LINUX_KARCH)" \
 		CROSS_COMPILE="$(TARGET_CROSS)" \
-		SUBDIRS="$(PKG_BUILD_DIR)/mod/stateful" \
+		M="$(PKG_BUILD_DIR)/src/mod/common" \
 		V="$(V)" \
 		modules
 	$(MAKE) -C "$(LINUX_DIR)" \
 		KERNEL_DIR="$(LINUX_DIR)" \
 		ARCH="$(LINUX_KARCH)" \
 		CROSS_COMPILE="$(TARGET_CROSS)" \
-		SUBDIRS="$(PKG_BUILD_DIR)/mod/stateless" \
+		M="$(PKG_BUILD_DIR)/src/mod/nat64" \
+		V="$(V)" \
+		modules
+	$(MAKE) -C "$(LINUX_DIR)" \
+		KERNEL_DIR="$(LINUX_DIR)" \
+		ARCH="$(LINUX_KARCH)" \
+		CROSS_COMPILE="$(TARGET_CROSS)" \
+		M="$(PKG_BUILD_DIR)/src/mod/siit" \
 		V="$(V)" \
 		modules
 	$(call Build/Compile/Default)
@@ -54,7 +54,6 @@ define Package/jool/Default
   SECTION:=net
   CATEGORY:=Network
   URL:=https://www.jool.mx
-  MAINTAINER:=Dan Luedtke <mail@danrl.com>
 endef
 
 define Package/jool/Default/description
@@ -80,10 +79,12 @@ define KernelPackage/jool
     @IPV6 \
     +kmod-crypto-md5 \
     +kmod-nf-conntrack \
-    +kmod-nf-conntrack6
+    +kmod-nf-conntrack6 \
+    +kmod-nf-ipt
   FILES:= \
-    $(PKG_BUILD_DIR)/mod/stateful/jool.$(LINUX_KMOD_SUFFIX) \
-    $(PKG_BUILD_DIR)/mod/stateless/jool_siit.$(LINUX_KMOD_SUFFIX)
+    $(PKG_BUILD_DIR)/src/mod/common/jool_common.$(LINUX_KMOD_SUFFIX) \
+    $(PKG_BUILD_DIR)/src/mod/nat64/jool.$(LINUX_KMOD_SUFFIX) \
+    $(PKG_BUILD_DIR)/src/mod/siit/jool_siit.$(LINUX_KMOD_SUFFIX)
 endef
 
 define KernelPackage/jool/description
@@ -95,7 +96,7 @@ endef
 define Package/jool-tools
   $(call Package/jool/Default)
   TITLE:=Jool userspace control programs
-  DEPENDS:=+libnl +ethtool
+  DEPENDS:=+libnl +libxtables
 endef
 
 define Package/jool-tools/description
@@ -104,10 +105,25 @@ define Package/jool-tools/description
   This package provides the userspace control programs for Jool.
 endef
 
+CONFIGURE_ARGS += \
+	--disable-shared \
+	--without-bash-completion-dir
+
+CONFIGURE_VARS += \
+	ac_cv_func_memset=yes \
+	ac_cv_func_strcasecmp=yes
+
 define Package/jool-tools/install
-	$(INSTALL_DIR) $(1)/usr/sbin/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/usr/stateful/jool       $(1)/usr/sbin/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/usr/stateless/jool_siit $(1)/usr/sbin/
+	$(INSTALL_DIR) $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/jool		$(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/joold		$(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/jool_siit	$(1)/usr/bin/
+
+	$(INSTALL_DIR) $(1)/usr/lib/iptables
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/iptables/libxt_JOOL_SIIT.so \
+		$(1)/usr/lib/iptables
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/iptables/libxt_JOOL.so \
+		$(1)/usr/lib/iptables
 endef
 
 $(eval $(call BuildPackage,jool))

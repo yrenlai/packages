@@ -1,6 +1,4 @@
 #
-# Copyright (C) 2007-2016 OpenWrt.org
-#
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
@@ -8,41 +6,37 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python-qrcode
-PKG_VERSION:=6.0
-PKG_RELEASE:=1
+PKG_VERSION:=6.1
+PKG_RELEASE:=3
+
+PYPI_NAME:=qrcode
+PKG_HASH:=505253854f607f2abf4d16092c61d4e9d511a3b4392e60bff957a68592b04369
+
+PKG_MAINTAINER:=Eneas U de Queiroz <cotequeiroz@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
+PKG_LICENSE_FILES:=LICENSE
 
-PKG_SOURCE:=qrcode-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://files.pythonhosted.org/packages/8d/b6/beed3d50e1047a2aa6437d3a653e5f31feb7f4de8bc054299dc205682e41
-PKG_HASH:=037b0db4c93f44586e37f84c3da3f763874fcac85b2974a69a98e399ac78e1bf
-PKG_BUILD_DIR:=$(BUILD_DIR)/qrcode-$(PKG_VERSION)
-
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
-include ../python-package.mk
+include ../python3-package.mk
 
-define Package/python-qrcode
-  SUBMENU:=Python
+define Package/python3-qrcode
   SECTION:=lang
   CATEGORY:=Languages
-  MAINTAINER:=Eneas U de Queiroz <cote2004-github@yahoo.com>
+  SUBMENU:=Python
   TITLE:=QR Code image generator
   URL:=https://github.com/lincolnloop/python-qrcode
-  DEPENDS:=+python +python-six
+  DEPENDS:= \
+	+python3 \
+	+python3-setuptools \
+	+python3-six \
+	+python3-pillow
 endef
 
-define Package/python-qrcode/description
+define Package/python3-qrcode/description
   Pure python QR Code generator
 endef
 
-define Build/Compile
-	$(call Build/Compile/PyMod,,install --prefix=/usr --root=$(PKG_INSTALL_DIR))
-endef
-
-define Package/python-qrcode/install
-	$(INSTALL_DIR) $(1)$(PYTHON_PKG_DIR)
-	$(CP) \
-	    $(PKG_INSTALL_DIR)$(PYTHON_PKG_DIR)/* \
-	    $(1)$(PYTHON_PKG_DIR)
-endef
-
-$(eval $(call BuildPackage,python-qrcode))
+$(eval $(call Py3Package,python3-qrcode))
+$(eval $(call BuildPackage,python3-qrcode))
+$(eval $(call BuildPackage,python3-qrcode-src))

@@ -5,20 +5,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=Werkzeug
-PKG_VERSION:=0.12.2
+PKG_VERSION:=1.0.1
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://pypi.python.org/packages/56/41/c095a77eb2dd69bf278dd664a97d3416af04e9ba1a00b8c138f772741d31/
-PKG_HASH:=903a7b87b74635244548b30d30db4c8947fe64c5198f58899ddcd3a13c23bb26
-PKG_BUILD_DEPENDS:=python python3
-PKG_LICENSE:=BSD-3-Clause
-PKG_LICENSE_FILES:=LICENSE
+PYPI_NAME:=$(PKG_NAME)
+PKG_HASH:=6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c
+
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
+PKG_LICENSE:=BSD-3-Clause
+PKG_LICENSE_FILES:=LICENSE.rst
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(BUILD_VARIANT)-$(PKG_NAME)-$(PKG_VERSION)
-PKG_UNPACK=$(HOST_TAR) -C $(PKG_BUILD_DIR) --strip-components=1 -xzf $(DL_DIR)/$(PKG_SOURCE)
-
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
 include ../python3-package.mk
 
@@ -26,17 +23,15 @@ define Package/python3-werkzeug
   SECTION:=lang
   CATEGORY:=Languages
   SUBMENU:=Python
-  URL:=http://werkzeug.pocoo.org/
-  TITLE:=python3-werkzeug
+  TITLE:=Werkzeug
+  URL:=https://palletsprojects.com/p/werkzeug/
   DEPENDS:=+python3-light +python3-email
-  VARIANT:=python3
 endef
 
 define Package/python3-werkzeug/description
-Werkzeug
-
-The Python WSGI Utility Library
+ The comprehensive WSGI web application library.
 endef
 
 $(eval $(call Py3Package,python3-werkzeug))
 $(eval $(call BuildPackage,python3-werkzeug))
+$(eval $(call BuildPackage,python3-werkzeug-src))

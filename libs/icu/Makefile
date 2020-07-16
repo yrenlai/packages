@@ -8,23 +8,26 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=icu4c
-PKG_VERSION:=62.1
+MAJOR_VERSION:=66
+MINOR_VERSION:=1
+PKG_VERSION:=$(MAJOR_VERSION).$(MINOR_VERSION)
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-62_1-src.tgz
-PKG_SOURCE_URL:=http://download.icu-project.org/files/$(PKG_NAME)/$(PKG_VERSION)
-PKG_HASH:=3dd9868d666350dda66a6e305eecde9d479fb70b30d5b55d78a1deffb97d5aa3
+PKG_SOURCE:=$(PKG_NAME)-$(MAJOR_VERSION)_$(MINOR_VERSION)-src.tgz
+PKG_SOURCE_URL:=https://github.com/unicode-org/icu/releases/download/release-$(MAJOR_VERSION)-$(MINOR_VERSION)
+PKG_HASH:=52a3f2209ab95559c1cf0a14f24338001f389615bf00e2585ef3dbc43ecf0a2e
 
-PKG_LICENSE:=ICU-1.8.1+
+PKG_LICENSE:=ICU
 PKG_LICENSE_FILES:=LICENSE
+PKG_CPE_ID:=cpe:/a:icu-project:international_components_for_unicode
 
 PKG_MAINTAINER:=Hirokazu MORIKAWA <morikw2@gmail.com>
 
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_BUILD_DEPENDS:=icu/host
+HOST_BUILD_DEPENDS:=python3/host
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/host-build.mk
@@ -38,6 +41,37 @@ define Package/icu
   TITLE:=International Components for Unicode
   URL:=http://icu-project.org
   DEPENDS:=+libstdcpp +libpthread
+endef
+
+define Package/icu/description
+  ICU is a mature, widely used set of C/C++ and Java libraries providing Unicode and Globalization support for software applications. ICU is widely portable and gives applications the same results on all platforms and between C/C++ and Java software.
+  This package supports C/C++.
+endef
+
+define Package/icu-full-data
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE:=Full ICU Data
+  URL:=http://icu-project.org
+  DEPENDS:=+icu
+endef
+
+define Package/icu-full-data/description
+  ICU makes use of a wide variety of data tables to provide many of its services. Examples include converter mapping tables, collation rules, transliteration rules, break iterator rules and dictionaries, and other locale data.
+  This package contains the complete data library provided by ICU.
+  A custom data library can be generated at http://apps.icu-project.org/datacustom/
+endef
+
+define Package/icu-data-tools
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE:=ICU Data manipulation tools
+  URL:=http://icu-project.org
+  DEPENDS:=+icu
+endef
+
+define Package/icu-data-tools/description
+ This package provides tools for manipulating ICU data.
 endef
 
 CONFIGURE_CMD:= ./runConfigureICU
@@ -57,7 +91,7 @@ CONFIGURE_ARGS:= \
 	--disable-tracing \
 	--disable-extras \
 	--enable-dyload \
-	--disable-tools \
+	--with-data-packaging=archive \
 	--disable-tests \
 	--disable-samples \
 	--with-cross-build="$(STAGING_DIR_HOSTPKG)/share/icu/$(PKG_VERSION)" \
@@ -77,6 +111,11 @@ HOST_CONFIGURE_ARGS:= \
 	--disable-extras \
 	--enable-dyload \
 	--prefix=$(STAGING_DIR_HOSTPKG)
+
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	mkdir -p $(PKG_BUILD_DIR)/data/out
+endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include
@@ -98,6 +137,8 @@ define Host/Install
 	$(INSTALL_BIN)  $(HOST_BUILD_DIR)/bin/icupkg $(STAGING_DIR_HOSTPKG)/share/icu/$(PKG_VERSION)/bin/
 	$(INSTALL_BIN)  $(HOST_BUILD_DIR)/bin/pkgdata $(STAGING_DIR_HOSTPKG)/share/icu/$(PKG_VERSION)/bin/
 	$(CP)           $(HOST_BUILD_DIR)/lib/*.so* $(STAGING_DIR_HOSTPKG)/share/icu/$(PKG_VERSION)/lib/
+	$(RM)           $(STAGING_DIR_HOSTPKG)/share/icu/current
+	(cd $(STAGING_DIR_HOSTPKG)/share/icu;$(LN) $(PKG_VERSION) current)
 endef
 
 define Package/icu/install
@@ -105,5 +146,20 @@ define Package/icu/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so* $(1)/usr/lib/
 endef
 
-$(eval $(call BuildPackage,icu))
+define Package/icu-full-data/install
+	$(INSTALL_DIR)  $(1)/usr/share/icu/$(PKG_VERSION)
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/share/icu/$(PKG_VERSION)/icudt*.dat \
+		$(1)/usr/share/icu/$(PKG_VERSION)/
+endef
+
+define Package/icu-data-tools/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/* $(1)/usr/sbin/
+endef
+
 $(eval $(call HostBuild))
+$(eval $(call BuildPackage,icu))
+$(eval $(call BuildPackage,icu-full-data))
+$(eval $(call BuildPackage,icu-data-tools))

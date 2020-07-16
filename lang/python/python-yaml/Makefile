@@ -7,60 +7,38 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=PyYAML
-PKG_VERSION:=3.12
-PKG_RELEASE:=1
+PKG_NAME:=python-yaml
+PKG_VERSION:=5.3.1
+PKG_RELEASE:=2
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://pyyaml.org/download/pyyaml/
-PKG_HASH:=592766c6303207a20efc445587778322d7f73b161bd994f227adaa341ba212ab
+PYPI_NAME:=PyYAML
+PKG_HASH:=b8eac752c5e14d3eca0e6dd9199cd627518cb5ec06add0de9d32baeee6fe645d
 
+PKG_MAINTAINER:=Josef Schlehofer <josef.schlehofer@nic.cz>
 PKG_LICENSE:=MIT
-PKG_LICENSE_FILES:=COPYING
-PKG_MAINTAINER:=Nicolas Thill <nico@openwrt.org>
+PKG_LICENSE_FILES:=LICENSE
+PKG_CPE_ID:=cpe:/a:pyyaml_project:pyyaml
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(BUILD_VARIANT)-$(PKG_NAME)-$(PKG_VERSION)
-PKG_UNPACK=$(HOST_TAR) -C $(PKG_BUILD_DIR) --strip-components=1 -xzf $(DL_DIR)/$(PKG_SOURCE)
-
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
-include ../python-package.mk
 include ../python3-package.mk
 
-define Package/python-yaml/Default
-  SUBMENU:=Python
+define Package/python3-yaml
   SECTION:=lang
   CATEGORY:=Languages
-  URL:=http://pyyaml.org/wiki/PyYAML
-  DEPENDS:=+libyaml
-endef
-
-define Package/python-yaml
-$(call Package/python-yaml/Default)
+  SUBMENU:=Python
   TITLE:=YAML parser and emitter for Python
-  DEPENDS+=+PACKAGE_python-yaml:python-light +PACKAGE_python-yaml:python-codecs
-  VARIANT:=python
+  URL:=https://github.com/yaml/pyyaml
+  DEPENDS:=+libyaml +python3-light
 endef
 
-define Package/python3-yaml
-$(call Package/python-yaml/Default)
-  TITLE:=YAML parser and emitter for Python3
-  DEPENDS+=+PACKAGE_python3-yaml:python3-light
-  VARIANT:=python3
+define Package/python3-yaml/description
+  PyYAML is a YAML parser and emitter for the Python programming language.
 endef
 
-define PyBuild/Compile
-	$(call Build/Compile/PyMod,,\
-		--with-libyaml install --prefix="$(PKG_INSTALL_DIR)/usr" \
-	)
-endef
+PYTHON3_PKG_SETUP_GLOBAL_ARGS:=--with-libyaml
+PYTHON3_PKG_SETUP_ARGS:=
 
-define Py3Build/Compile
-	$(call Build/Compile/Py3Mod,,\
-		--with-libyaml install --prefix="$(PKG_INSTALL_DIR)/usr" \
-	)
-endef
-
-$(eval $(call PyPackage,python-yaml))
-$(eval $(call BuildPackage,python-yaml))
 $(eval $(call Py3Package,python3-yaml))
 $(eval $(call BuildPackage,python3-yaml))
+$(eval $(call BuildPackage,python3-yaml-src))

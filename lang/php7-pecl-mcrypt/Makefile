@@ -8,9 +8,9 @@ include $(TOPDIR)/rules.mk
 PECL_NAME:=mcrypt
 PECL_LONGNAME:=Bindings for the libmcrypt library
 
-PKG_VERSION:=1.0.1
-PKG_RELEASE:=1
-PKG_HASH:=a3b0e5493b5cd209ab780ee54733667293d369e6b7052b4a7dab9dd0def46ac6
+PKG_VERSION:=1.0.3
+PKG_RELEASE:=2
+PKG_HASH:=affd675843a079e9efd49ac2f723286dd5bcb0916315aa53e2ae5edd5eadb034
 
 PKG_NAME:=php7-pecl-mcrypt
 PKG_SOURCE:=$(PECL_NAME)-$(PKG_VERSION).tgz
@@ -18,14 +18,12 @@ PKG_SOURCE_URL:=http://pecl.php.net/get/
 
 PKG_MAINTAINER:=W. Michael Petullo <mike@flyn.org>
 
-PKG_LICENSE:=PHPv3.01
+PKG_LICENSE:=PHP-3.01
 PKG_LICENSE_FILES:=LICENSE
 
 PKG_BUILD_DEPENDS:=php7
 PKG_BUILD_DIR:=$(BUILD_DIR)/pecl-php7/$(PECL_NAME)-$(PKG_VERSION)
 PKG_BUILD_PARALLEL:=1
-
-PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk

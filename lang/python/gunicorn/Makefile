@@ -8,45 +8,63 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gunicorn
-PKG_VERSION:=19.7.1
-PKG_RELEASE=1
+PKG_VERSION:=20.0.4
+PKG_RELEASE:=2
+
+PYPI_NAME:=$(PKG_NAME)
+PKG_HASH:=1904bb2b8a43658807108d59c3f3d56c2b6121a701161de0ddf9ad140073c626
+
+PKG_MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>
 PKG_LICENSE:=MIT
+PKG_LICENSE_FILES:=LICENSE
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://pypi.python.org/packages/30/3a/10bb213cede0cc4d13ac2263316c872a64bf4c819000c8ccd801f1d5f822/
-PKG_HASH:=eee1169f0ca667be05db3351a0960765620dad53f53434262ff8901b68a1b622
-
+include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
-include ../python-package.mk
+include ../python3-package.mk
 
-define Package/gunicorn
-    SUBMENU:=Python
-    SECTION:=lang
-    CATEGORY:=Languages
-    TITLE:=WSGI HTTP Server for UNIX
-    MAINTAINER:=Gergely Kiss <mail.gery@gmail.com>
-    URL:=http://gunicorn.org/
-    DEPENDS:=+python +python-setuptools
+define Package/gunicorn/Default
+  SUBMENU:=Python
+  SECTION:=lang
+  CATEGORY:=Languages
+  TITLE:=WSGI HTTP Server for UNIX
+  URL:=https://gunicorn.org
 endef
 
-define Package/gunicorn/description
-    WSGI HTTP Server for UNIX
+define Package/python3-gunicorn
+$(call Package/gunicorn/Default)
+  TITLE:=WSGI HTTP Server for UNIX (library)
+  DEPENDS:=+python3
 endef
 
-define Build/Compile
-	$(call Build/Compile/PyMod,,install --prefix=/usr --root=$(PKG_INSTALL_DIR))
+define Package/python3-gunicorn/description
+    WSGI HTTP Server for UNIX (libraries)
 endef
 
-define Package/gunicorn/install
-	$(INSTALL_DIR) $(1)$(PYTHON_PKG_DIR)
+# Make sure that the binaries are not installed with the libraries
+# That means adding some empty Py3Package/gunicorn3/install rules
+define Py3Package/python3-gunicorn/install
+	:
+endef
+
+define Package/gunicorn3
+$(call Package/gunicorn/Default)
+  DEPENDS:=+python3 +python3-setuptools +python3-gunicorn
+endef
+
+define Package/gunicorn3/description
+    WSGI HTTP Server for UNIX (daemon)
+endef
+
+define Package/gunicorn3/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) \
-	    $(PKG_INSTALL_DIR)$(PYTHON_PKG_DIR)/* \
-	    $(1)$(PYTHON_PKG_DIR)
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/gunicorn* \
-	    $(1)/usr/bin
-	# fix python exec path in scripts
-	$(SED) 's/#!.*/#!\/usr\/bin\/python/g' $(1)/usr/bin/gunicorn*
+	$(INSTALL_BIN) \
+		$(PKG_INSTALL_DIR)/usr/bin/gunicorn \
+		$(1)/usr/bin/gunicorn3
+	$(LN) gunicorn3 $(1)/usr/bin/gunicorn
+	$(call Python3/FixShebang,$(1)/usr/bin/*)
 endef
 
-$(eval $(call BuildPackage,gunicorn))
+$(eval $(call Py3Package,python3-gunicorn))
+$(eval $(call BuildPackage,python3-gunicorn))
+$(eval $(call BuildPackage,python3-gunicorn-src))
+$(eval $(call BuildPackage,gunicorn3))
